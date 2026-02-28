@@ -53,11 +53,12 @@ Power BI Dashboard
 lol_stats/
 ├── scraper.py              # all scraping functions
 ├── notebooks/
-│   ├── 01_scrape_players.py
-│   ├── 02_scrape_teams.py
-│   ├── 03_scrape_matches.py
-│   ├── 04_scrape_games.py
-│   └── 05_load_to_staging.py
+│   ├── 01_scrape_tournaments.py
+│   ├── 02_scrape_players.py
+│   ├── 03_scrape_teams.py
+│   ├── 04_scrape_matches.py
+│   ├── 05_scrape_games.py
+│   └── 06_load_to_staging.py
 ├── utils/
 │   └── pipeline_monitor.py
 ├── dbt/

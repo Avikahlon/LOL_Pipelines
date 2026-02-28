@@ -1,0 +1,8 @@
+aiohttp
+selectolax
+beautifulsoup4
+requests
+python-dotenv
+jsonlines
+great-expectations
+dbt-databricks
