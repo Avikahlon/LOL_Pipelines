@@ -566,27 +566,15 @@ def get_bo_(score):
 async def get_game_url(session, match_url, score):
 
     try:
-        with open(log_path, "a") as log:
-            log.write(f"Fetching: {match_url}\n")
+        print(f"Fetching: {match_url}\n")
 
         timeout = aiohttp.ClientTimeout(total=15)
         async with session.get(match_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout) as resp:
-            with open(log_path, "a") as log:
-                log.write(f"Status: {resp.status}\n")
 
             html = await resp.text()
 
-            with open(log_path, "a") as log:
-                log.write(f"HTML length: {len(html)}\n")
-
             tree = LexborHTMLParser(html)
             game_links = tree.css("li.game-menu-button a[href*='/page-game/']")
-
-            with open(log_path, "a") as log:
-                log.write(f"Found {len(game_links)} game links\n")
-                for link in game_links:
-                    log.write(f"Link: {link.attributes.get('href', '')}\n")
-                log.write("-" * 50 + "\n")
 
             urls = [
                 "https://gol.gg" + link.attributes.get("href", "").replace("..", "")
@@ -595,8 +583,7 @@ async def get_game_url(session, match_url, score):
             ]
             return urls if urls else []
     except Exception as e:
-        with open(log_path, "a") as log:
-            log.write(f"Failed for {match_url}: {e}\n")
+        print(f"Failed for {match_url}: {e}\n")
         return []
 
 
