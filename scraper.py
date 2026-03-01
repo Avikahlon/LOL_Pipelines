@@ -540,11 +540,15 @@ def extract_player_game_data(tree: HTMLParser, game_url: str, game_number: int):
 async def fetch(session, url, semaphore, headers=None):
     async with semaphore:
         try:
-            async with session.get(url, headers=headers, timeout=30) as response:
+            timeout = aiohttp.ClientTimeout(total=30)
+            async with session.get(url, headers=headers, timeout=timeout) as response:
                 if response.status != 200:
                     print(f"Failed {url}: {response.status}")
                     return None
                 return await response.text()
+        except asyncio.TimeoutError:
+            print(f"Timeout fetching {url}")
+            return None
         except Exception as e:
             print(f"Error fetching {url}: {e}")
             return None
@@ -568,7 +572,8 @@ async def get_game_url(session, match_url, score):
         with open(log_path, "a") as log:
             log.write(f"Fetching: {match_url}\n")
 
-        async with session.get(match_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15) as resp:
+        timeout = aiohttp.ClientTimeout(total=15)
+        async with session.get(match_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout) as resp:
             with open(log_path, "a") as log:
                 log.write(f"Status: {resp.status}\n")
 
