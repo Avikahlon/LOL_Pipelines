@@ -18,7 +18,7 @@ match_schema = StructType([StructField(k, StringType(), True) for k in schema_ke
 
 try:
     print("Loading tournament names...")
-    tournaments = load_tournament_names()
+    tournaments = load_tournament_names(spark)
     print(f"Got {len(tournaments)} tournaments")
 
     print("Scraping matches...")

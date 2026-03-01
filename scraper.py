@@ -18,14 +18,6 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-ENDPOINT = os.getenv('endpoint')
-PORT = int(os.getenv('port', 5433))
-USER = os.getenv('user')
-PASSWORD = os.getenv('password')
-DBNAME = os.getenv('dbname')
-REGION = os.getenv('region')
-
-
 def data_cleaner(value, dtype=str):
     if value is None:
         return None
@@ -146,62 +138,24 @@ def get_seasons():
 
 
 # helper func
-def load_tournament_names():
-    try:
-        conn = psycopg2.connect(
-            host=ENDPOINT,
-            port=PORT,
-            database=DBNAME,
-            user=USER,
-            password=PASSWORD,
-            sslmode="disable",
-            channel_binding="disable"
-        )
-        cur = conn.cursor()
-        cur.execute("SELECT tournament_name FROM tournaments_staging;")
-        rows = cur.fetchall()
-        tournaments = [row[0] for row in rows]
-        return tournaments
-
-    except Exception as e:
-        print("Database connection failed due to {}".format(e))
-        return []
+def load_tournament_names(spark):
+    df = spark.table("lol_raw.tournaments")
+    return [row["trname"] for row in df.select("trname").distinct().collect()]
 
 
 # helper func
-def get_urls_from_db():
-    try:
-        conn = psycopg2.connect(
-            host=ENDPOINT,
-            port=PORT,
-            database=DBNAME,
-            user=USER,
-            password=PASSWORD,
-            sslmode="disable",
-            channel_binding="disable"
-        )
-        cur = conn.cursor()
-        cur.execute("SELECT game_urls FROM matches_staging;")
-        rows = cur.fetchall()
-        urls = []
-        for row in rows:
-            value = row[0]
-            if isinstance(value, str):
-                try:
-                    parsed = json.loads(value)
+def get_urls_from_db(spark):
+    df = spark.table("lol_raw.matches")
+    urls = []
+    for row in df.select("game_urls").collect():
+        if row["game_urls"]:
+            try:
+                parsed = json.loads(row["game_urls"])
+                if isinstance(parsed, list):
                     urls.extend(parsed)
-                except json.JSONDecodeError:
-                    urls.append(value)
-            elif isinstance(value, list):
-                urls.extend(value)
-            else:
-                urls.append(str(value))
-
-        return urls
-
-    except Exception as e:
-        print("Database connection failed due to {}".format(e))
-        return []
+            except:
+                pass
+    return urls
 
 
 # Gets all tournaments and their basic details
