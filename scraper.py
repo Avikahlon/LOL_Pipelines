@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import requests
 import os
 from urllib.parse import quote
-import psycopg2
 import json
 from dotenv import load_dotenv
 import time
@@ -12,6 +11,8 @@ import asyncio
 import logging
 from selectolax.lexbor import LexborHTMLParser
 from selectolax.parser import HTMLParser
+import nest_asyncio
+nest_asyncio.apply()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
