@@ -6,3 +6,4 @@ python-dotenv
 jsonlines
 great-expectations
 dbt-databricks
+nest_asyncio

@@ -1,6 +1,8 @@
 import sys
 sys.path.insert(0, "/Workspace/Users/abhijeetsk247@gmail.com/LOL_Pipelines")
 
+import nest_asyncio
+nest_asyncio.apply()
 from scraper import get_game
 from utils.pipeline_monitor import log_pipeline_run
 from pyspark.sql.types import StructType, StructField, StringType
