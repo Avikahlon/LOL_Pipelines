@@ -1,7 +1,6 @@
 import re
 from bs4 import BeautifulSoup
 import requests
-import os
 from urllib.parse import quote
 import json
 from dotenv import load_dotenv
@@ -565,8 +564,6 @@ def get_bo_(score):
 
 
 async def get_game_url(session, match_url, score):
-    os.makedirs("data", exist_ok=True)
-    log_path = "data/game_url_debug.log"
 
     try:
         with open(log_path, "a") as log:
