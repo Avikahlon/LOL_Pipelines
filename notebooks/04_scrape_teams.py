@@ -1,6 +1,5 @@
-%pip install aiohttp selectolax beautifulsoup4 requests python-dotenv
-
 import sys
+
 sys.path.insert(0, "/Workspace/Users/abhijeetsk247@gmail.com/LOL_Pipelines")
 
 from scraper import get_teams
