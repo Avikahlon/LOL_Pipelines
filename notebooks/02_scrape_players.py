@@ -6,8 +6,6 @@ from utils.pipeline_monitor import log_pipeline_run
 from pyspark.sql.types import StructType, StructField, StringType
 import json
 
-spark.sql("CREATE DATABASE IF NOT EXISTS lol_raw")
-
 schema_keys = ["name", "link", "country", "games", "winrate", "kda", "avg_kills", "avg_deaths",
                "avg_assists", "csm", "gpm", "kp", "dmg_pct", "gold_pct", "v_pct", "dpm", "vspm",
                "wpm", "wcpm", "vwpm", "gd15", "csd15", "xpd15", "fb_pct", "fb_victim_pct",
