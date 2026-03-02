@@ -7,3 +7,4 @@ data/
 *.jsonl
 *.log
 .idea/
+test.py

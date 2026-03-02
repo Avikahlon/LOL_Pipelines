@@ -535,24 +535,6 @@ def extract_player_game_data(tree: HTMLParser, game_url: str, game_number: int):
 
 """MATCHES"""
 
-
-async def fetch(session, url, semaphore, headers=None):
-    async with semaphore:
-        try:
-            timeout = aiohttp.ClientTimeout(total=30)
-            async with session.get(url, headers=headers, timeout=timeout) as response:
-                if response.status != 200:
-                    print(f"Failed {url}: {response.status}")
-                    return None
-                return await response.text()
-        except asyncio.TimeoutError:
-            print(f"Timeout fetching {url}")
-            return None
-        except Exception as e:
-            print(f"Error fetching {url}: {e}")
-            return None
-
-
 def get_bo_(score):
     if not score or "-" not in score:
         return None
@@ -562,29 +544,51 @@ def get_bo_(score):
     except ValueError:
         return None
 
+async def fetch(session, url, semaphore, headers=None, retries=3):
+    async with semaphore:
+        for attempt in range(retries):
+            try:
+                timeout = aiohttp.ClientTimeout(total=60)
+                async with session.get(url, headers=headers, timeout=timeout) as response:
+                    if response.status != 200:
+                        print(f"Failed {url}: {response.status}")
+                        return None
+                    return await response.text()
+            except asyncio.TimeoutError:
+                print(f"Timeout fetching {url} (attempt {attempt + 1}/{retries})")
+                if attempt < retries - 1:
+                    await asyncio.sleep(2)
+                continue
+            except Exception as e:
+                print(f"Error fetching {url}: {e}")
+                return None
+        print(f"All retries failed for {url}")
+        return None
 
-async def get_game_url(session, match_url, score):
 
-    try:
-        print(f"Fetching: {match_url}\n")
-
-        timeout = aiohttp.ClientTimeout(total=15)
-        async with session.get(match_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout) as resp:
-
-            html = await resp.text()
-
-            tree = LexborHTMLParser(html)
-            game_links = tree.css("li.game-menu-button a[href*='/page-game/']")
-
-            urls = [
-                "https://gol.gg" + link.attributes.get("href", "").replace("..", "")
-                for link in game_links
-                if link.attributes.get("href", "")
-            ]
-            return urls if urls else []
-    except Exception as e:
-        print(f"Failed for {match_url}: {e}\n")
-        return []
+async def get_game_url(session, match_url, score, retries=3):
+    for attempt in range(retries):
+        try:
+            timeout = aiohttp.ClientTimeout(total=60)
+            async with session.get(match_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout) as resp:
+                html = await resp.text()
+                tree = LexborHTMLParser(html)
+                game_links = tree.css("li.game-menu-button a[href*='/page-game/']")
+                urls = [
+                    "https://gol.gg" + link.attributes.get("href", "").replace("..", "")
+                    for link in game_links
+                    if link.attributes.get("href", "")
+                ]
+                return urls if urls else []
+        except asyncio.TimeoutError:
+            print(f"Timeout fetching game URLs for {match_url} (attempt {attempt + 1}/{retries})")
+            if attempt < retries - 1:
+                await asyncio.sleep(2)
+            continue
+        except Exception as e:
+            print(f"Failed to get game URLs for {match_url}: {e}")
+            return []
+    return []
 
 
 async def fetch_tournament_matches(session, tournament, semaphore):
@@ -607,7 +611,7 @@ async def fetch_tournament_matches(session, tournament, semaphore):
         return []
 
     matches = []
-    rows = table.css("tr")[1:]  # skip header row
+    rows = table.css("tr")[1:]
 
     for row in rows:
         cols = row.css("td")
@@ -624,7 +628,6 @@ async def fetch_tournament_matches(session, tournament, semaphore):
             match_url = "https://gol.gg/game/stats/" + match_url.split("/game/stats/")[-1]
 
         match_name = link_tag.text().strip()
-
         team1_name = cols[1].text().strip()
         score = cols[2].text().strip()
         team2_name = cols[3].text().strip()
@@ -642,7 +645,6 @@ async def fetch_tournament_matches(session, tournament, semaphore):
         else:
             winner = loser = None
 
-        # Run sub-tasks concurrently
         bo = get_bo_(score)
         game_urls = await get_game_url(session, match_url, score)
 
@@ -662,10 +664,11 @@ async def fetch_tournament_matches(session, tournament, semaphore):
             "game_urls": game_urls,
         })
 
+    await asyncio.sleep(0.5)
     return matches
 
 
-async def get_matches_async(tournaments, max_concurrent=20):
+async def get_matches_async(tournaments, max_concurrent=5):
     semaphore = asyncio.Semaphore(max_concurrent)
     results = []
     start = time.time()
@@ -679,5 +682,4 @@ async def get_matches_async(tournaments, max_concurrent=20):
             results.extend(matches)
 
     print(f"Finished in {time.time() - start:.2f}s")
-
     return results
