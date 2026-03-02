@@ -7,8 +7,6 @@ from utils.pipeline_monitor import log_pipeline_run
 import json
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
-spark.sql("CREATE DATABASE IF NOT EXISTS lol_raw")
-
 try:
     print("Scraping tournaments...")
     raw = get_tournaments()
