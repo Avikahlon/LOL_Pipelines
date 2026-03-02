@@ -1,6 +1,7 @@
 aiohttp
 selectolax
 beautifulsoup4
+bs4
 requests
 python-dotenv
 jsonlines
