@@ -10,8 +10,6 @@ from pyspark.sql.types import StructType, StructField, StringType
 import asyncio
 import json
 
-spark.sql("CREATE DATABASE IF NOT EXISTS lol_raw")
-
 schema_keys = ["match_name", "tournament", "match_url", "team1", "team2", "winner", "loser",
                "score", "match_type", "patch", "date", "BO", "game_urls"]
 
