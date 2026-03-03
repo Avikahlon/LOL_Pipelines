@@ -434,9 +434,9 @@ def extract_team_game_data(tree: HTMLParser, game_url: str):
         # Dragons with XS class
         dragon_imgs = stats_row.css("img.champion_icon_XS")
         dragon_types = [
-            img.attributes.get("alt", "").strip()
+            img.attributes.get("alt") or ""
             for img in dragon_imgs
-            if img.attributes.get("alt", "").strip()
+            if img.attributes.get("alt")
         ]
 
         rows = side.css("div.row")
@@ -451,16 +451,16 @@ def extract_team_game_data(tree: HTMLParser, game_url: str):
             if label_text == "Bans":
                 ban_imgs = row.css("div.col-10 img.champion_icon_medium")
                 bans = [
-                    img.attributes.get("alt", "").strip()
+                    img.attributes.get("alt") or ""
                     for img in ban_imgs
-                    if img.attributes.get("alt", "").strip()
+                    if img.attributes.get("alt")
                 ]
             elif label_text == "Picks":
                 pick_imgs = row.css("div.col-10 img.champion_icon_medium")
                 picks = [
-                    img.attributes.get("alt", "").strip()
+                    img.attributes.get("alt") or ""
                     for img in pick_imgs
-                    if img.attributes.get("alt", "").strip()
+                    if img.attributes.get("alt")
                 ]
 
         game_data.append({
