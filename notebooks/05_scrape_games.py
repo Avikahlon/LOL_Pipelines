@@ -1,6 +1,6 @@
 import sys
 sys.path.insert(0, "/Workspace/Users/abhijeetsk247@gmail.com/LOL_Pipelines")
-
+import ast
 import nest_asyncio
 nest_asyncio.apply()
 from scraper import get_game
@@ -38,12 +38,12 @@ try:
     game_urls = []
     for row in urls_df:
         if row["game_urls"]:
-            # game_urls stored as string so parse it back
             try:
-                urls = json.loads(row["game_urls"])
-                game_urls.extend(urls)
+                parsed = ast.literal_eval(row["game_urls"])
+                if isinstance(parsed, list):
+                    game_urls.extend(parsed)
             except:
-                pass
+                print("Error parsing game url {}".format(row["game_urls"]))
 
     # filter already scraped
     if spark.catalog.tableExists("lol_raw.games"):

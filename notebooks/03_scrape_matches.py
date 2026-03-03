@@ -22,7 +22,7 @@ try:
     print(f"Got {len(tournaments)} tournaments")
 
     print("Scraping matches...")
-    raw = asyncio.run(get_matches_async(tournaments, max_concurrent=10))
+    raw = asyncio.run(get_matches_async(tournaments, max_concurrent=30))
     print(f"Got {len(raw)} match records")
 
     rows = []
