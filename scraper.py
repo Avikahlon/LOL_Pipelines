@@ -235,7 +235,7 @@ def get_players():
                     continue
 
                 name_tag = cols[0].find('a')
-                name = name_tag.text.strip()
+                name = name_tag.text.strip() or ""
                 link = name_tag['href']
 
                 country = cols[1].find("span").text.strip() if cols[1].find("span") else cols[1].get_text(strip=True)
@@ -301,7 +301,7 @@ def get_teams():
                     continue
 
                 name_tag = cols[0].find('a')
-                name = name_tag.text.strip()
+                name = name_tag.text.strip() or ""
 
                 values = [name] + [c.get_text(strip=True) for c in cols[2:32]] + [season, split]
 
@@ -593,7 +593,7 @@ async def get_game_url(session, match_url, score, retries=3):
 
 async def fetch_tournament_matches(session, tournament, semaphore):
     encoded = quote(tournament)
-    url = f"https://gol.gg/tournament/tournament-matchlist/{encoded}/"
+    url = f"https://gol.gg/tournament/tournament-matchlist/{encoded}/" or ""
     headers = {
         "User-Agent": "Mozilla/5.0",
         "Referer": "https://gol.gg/tournament-matchlist/",
@@ -622,7 +622,8 @@ async def fetch_tournament_matches(session, tournament, semaphore):
         if not link_tag:
             continue
 
-        match_url = link_tag.attributes.get("href", "").strip().replace("page-game", "page-summary")
+        match_url = (link_tag.attributes.get("href", "").strip().replace("page-game", "page-summary")
+                     .replace("page-preview", "page-summary"))
 
         if not match_url.startswith("http"):
             match_url = "https://gol.gg/game/stats/" + match_url.split("/game/stats/")[-1]
