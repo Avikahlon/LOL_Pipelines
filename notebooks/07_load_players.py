@@ -4,8 +4,23 @@ spark.sql("CREATE DATABASE IF NOT EXISTS lol_staging")
 
 raw_df = spark.table("lol_raw.players")
 
+def clean_float(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.col(col_name))
+
+def clean_int(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.col(col_name).cast("int"))
+
 def strip_pct(col_name):
-    return F.regexp_replace(F.col(col_name), "%", "").cast("float")
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.regexp_replace(F.col(col_name), "%", ""))
 
 staging_df = raw_df.select(
     F.col("name").alias("player_name"),
@@ -13,30 +28,30 @@ staging_df = raw_df.select(
     F.col("country"),
     F.col("season"),
     F.col("split"),
-    F.col("games").cast("int"),
+    clean_int("games"),
     (strip_pct("winrate") / 100).alias("winrate"),
-    F.col("kda").cast("float"),
-    F.col("avg_kills").cast("float"),
-    F.col("avg_deaths").cast("float"),
-    F.col("avg_assists").cast("float"),
-    F.col("csm").cast("float"),
-    F.col("gpm").cast("float"),
+    clean_float("kda"),
+    clean_float("avg_kills"),
+    clean_float("avg_deaths"),
+    clean_float("avg_assists"),
+    clean_float("csm"),
+    clean_float("gpm"),
     (strip_pct("kp") / 100).alias("kp"),
     (strip_pct("dmg_pct") / 100).alias("dmg_pct"),
     (strip_pct("gold_pct") / 100).alias("gold_pct"),
     (strip_pct("v_pct") / 100).alias("vision_pct"),
-    F.col("dpm").cast("float"),
-    F.col("vspm").cast("float"),
-    F.col("wpm").cast("float"),
-    F.col("wcpm").cast("float"),
-    F.col("vwpm").cast("float"),
-    F.col("gd15").cast("float"),
-    F.col("csd15").cast("float"),
-    F.col("xpd15").cast("float"),
+    clean_float("dpm"),
+    clean_float("vspm"),
+    clean_float("wpm"),
+    clean_float("wcpm"),
+    clean_float("vwpm"),
+    clean_float("gd15"),
+    clean_float("csd15"),
+    clean_float("xpd15"),
     (strip_pct("fb_pct") / 100).alias("fb_pct"),
     (strip_pct("fb_victim_pct") / 100).alias("fb_victim_pct"),
-    F.col("penta_kills").cast("int"),
-    F.col("solo_kills").cast("int"),
+    clean_int("penta_kills"),
+    clean_int("solo_kills"),
     F.col("extras")
 ) \
 .filter(F.col("name").isNotNull()) \

@@ -1,9 +1,12 @@
 from pyspark.sql import functions as F
-import ast
-
-spark.sql("CREATE DATABASE IF NOT EXISTS lol_staging")
 
 raw_df = spark.table("lol_raw.matches")
+
+def clean_int(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.col(col_name).cast("int"))
 
 staging_df = raw_df.select(
     F.col("match_name"),
@@ -17,7 +20,7 @@ staging_df = raw_df.select(
     F.col("match_type"),
     F.col("patch"),
     F.to_date(F.col("date"), "yyyy-MM-dd").alias("date"),
-    F.col("BO").cast("int").alias("bo"),
+    clean_int("BO").alias("bo"),
     F.col("game_urls"),
     F.col("extras")
 ) \

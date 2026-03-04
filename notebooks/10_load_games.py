@@ -1,19 +1,23 @@
 from pyspark.sql import functions as F
 
-spark.sql("CREATE DATABASE IF NOT EXISTS lol_staging")
-
 raw_df = spark.table("lol_raw.player_games")
+
+def clean_int(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.col(col_name).cast("int"))
 
 staging_df = raw_df.select(
     F.col("game_url"),
-    F.col("game_number").cast("int"),
+    clean_int("game_number"),
     F.col("player_name"),
     F.col("team_side"),
     F.col("champion"),
-    F.col("kills").cast("int"),
-    F.col("deaths").cast("int"),
-    F.col("assists").cast("int"),
-    F.col("cs").cast("int"),
+    clean_int("kills"),
+    clean_int("deaths"),
+    clean_int("assists"),
+    clean_int("cs"),
     F.col("extras")
 ) \
 .filter(F.col("game_url").isNotNull()) \
