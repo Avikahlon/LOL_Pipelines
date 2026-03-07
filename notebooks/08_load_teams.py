@@ -42,7 +42,7 @@ staging_df = raw_df.select(
     clean_float("GPM").alias("gpm"),
     clean_float("GDM").alias("gdm"),
     parse_duration("gameDuration").alias("game_duration"),
-    (strip_pct("first_pick_pct%") / 100).alias("first_pick_pct"),
+    (strip_pct("first_pick_pct") / 100).alias("first_pick_pct"),
     (strip_pct("blue_side_pct") / 100).alias("blue_side_pct"),
     clean_float("killsPerGame").alias("kills_per_game"),
     clean_float("deathsPerGame").alias("deaths_per_game"),
