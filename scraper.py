@@ -491,7 +491,7 @@ def extract_player_game_data(tree: HTMLParser, game_url: str):
         text = active_button.text(strip=True)
         if "Game" in text:
             try:
-                game_number = int(text.replace("Game", "").strip())
+                game_number = int(text.replace("Game", "").strip()) or 1
             except ValueError:
                 game_number = 1
 
