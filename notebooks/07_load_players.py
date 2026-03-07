@@ -8,19 +8,19 @@ def clean_float(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.col(col_name))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.-]", ""), "float"))
 
 def clean_int(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.col(col_name).cast("int"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9]", ""), "int"))
 
 def strip_pct(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.regexp_replace(F.col(col_name), "%", "").cast("float"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.]", ""), "float"))
 
 staging_df = raw_df.select(
     F.col("name").alias("player_name"),

@@ -6,19 +6,19 @@ def clean_float(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.col(col_name).cast("float"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.-]", ""), "float"))
 
 def clean_int(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.col(col_name).cast("int"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9]", ""), "int"))
 
 def strip_pct(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.regexp_replace(F.col(col_name), "%", "").cast("float"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.]", ""), "float"))
 
 def parse_duration(col_name):
     return F.when(
@@ -36,13 +36,13 @@ staging_df = raw_df.select(
     F.col("season"),
     F.col("split"),
     clean_int("games").alias("games"),
-    (strip_pct("winrate") / 100).alias("winrate"),o
+    (strip_pct("winrate") / 100).alias("winrate"),
     clean_float("`k:d`").alias("kda"),
     clean_float("GPM").alias("gpm"),
     clean_float("GDM").alias("gdm"),
     parse_duration("gameDuration").alias("game_duration"),
-    (strip_pct("FP%") / 100).alias("fp_pct"),
-    (strip_pct("BS%") / 100).alias("bs_pct"),
+    (strip_pct("FP%") / 100).alias("fpick_pct"),
+    (strip_pct("BS%") / 100).alias("bside_pct"),
     clean_float("killsPerGame").alias("kills_per_game"),
     clean_float("deathsPerGame").alias("deaths_per_game"),
     clean_float("towersKilled").alias("towers_killed"),
