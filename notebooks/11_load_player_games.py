@@ -2,11 +2,23 @@ from pyspark.sql import functions as F
 
 raw_df = spark.table("lol_raw.player_games")
 
+def clean_float(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.-]", ""), "float"))
+
 def clean_int(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.col(col_name).cast("int"))
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9]", ""), "int"))
+
+def strip_pct(col_name):
+    return F.when(
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        None
+    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.]", ""), "float"))
 
 staging_df = raw_df.select(
     F.col("game_url"),
