@@ -259,7 +259,8 @@ def get_teams():
 
     all_teams = []
 
-    headers_list = ["name", "region", "games", "winrate", "k:d", "GPM", "GDM", "gameDuration", "killsPerGame",
+    headers_list = ["name", "region", "games", "winrate", "k:d", "GPM", "GDM", "gameDuration", "first_pick_pct%",
+                    "blue_side_pct", "killsPerGame",
                     "deathsPerGame", "towersKilled", "towersLost", "FBpercent", "FTpercent", "FOSpercent",
                     "dragsPerGame", "dragPercent", "vgPerGame", "heraldPercent", "atakPercent", "avgDrags15", "TDat15",
                     "GDat15", "platesPerGame", "baronPergame", "baronPercent", "cspm", "dpm",
