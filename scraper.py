@@ -256,22 +256,47 @@ def get_players():
 def get_teams():
     seasons = get_seasons()
     splits = ["ALL", "Pre-Season", "Winter", "Spring", "Summer"]
-
     all_teams = []
 
-    headers_list = ["name", "region", "games", "winrate", "k:d", "GPM", "GDM", "gameDuration", "first_pick_pct",
-                    "blue_side_pct", "killsPerGame",
-                    "deathsPerGame", "towersKilled", "towersLost", "FBpercent", "FTpercent", "FOSpercent",
-                    "dragsPerGame", "dragPercent", "vgPerGame", "heraldPercent", "atakPercent", "avgDrags15", "TDat15",
-                    "GDat15", "platesPerGame", "baronPergame", "baronPercent", "cspm", "dpm",
-                    "wpm", "visionWardsPM", "wardsClearedPM", "season", "split"]
+    known_headers = {
+        "Name": "name",
+        "Season": "season",
+        "Region": "region",
+        "Games": "games",
+        "Win rate": "winrate",
+        "K:D": "kd",
+        "GPM": "GPM",
+        "GDM": "GDM",
+        "Game duration": "gameDuration",
+        "FP%": "FP%",
+        "Blue%": "Blue%",
+        "Kills / game": "killsPerGame",
+        "Deaths / game": "deathsPerGame",
+        "Towers killed": "towersKilled",
+        "Towers lost": "towersLost",
+        "FB%": "FBpercent",
+        "FT%": "FTpercent",
+        "DRAPG": "dragsPerGame",
+        "DRA%": "dragPercent",
+        "VGPG": "vgPerGame",
+        "HER%": "heraldPercent",
+        "DRA@15": "avgDrags15",
+        "TD@15": "TDat15",
+        "GD@15": "GDat15",
+        "PPG": "platesPerGame",
+        "NASHPG": "baronPergame",
+        "NASH%": "baronPercent",
+        "CSM": "cspm",
+        "DPM": "dpm",
+        "WPM": "wpm",
+        "VWPM": "visionWardsPM",
+        "WCPM": "wardsClearedPM",
+    }
 
     for split in splits:
         for i, season in enumerate(seasons):
             if i <= 2:
                 continue
-
-            # print(f"Fetching team stats for {season},{split} ...")
 
             url = f"https://gol.gg/teams/list/season-{season}/split-{split}/tournament-ALL/"
 
@@ -294,22 +319,36 @@ def get_teams():
                 print(f"No team table found for {season}")
                 continue
 
-            rows = table.find_all("tr")[1:]
+            # get headers once per page
+            page_headers = [th.get_text(strip=True) for th in table.find_all("th")]
 
-            for row in rows:
-                cols = row.find_all('td')
-                if len(cols) < 24:
+            for row in table.find_all("tr")[1:]:
+                cols = row.find_all("td")
+                if len(cols) < 2:
                     continue
 
-                name_tag = cols[0].find('a')
-                name = name_tag.text.strip() or ""
+                team = {"split": split}
+                extras = {}
 
-                values = [name] + [c.get_text(strip=True) for c in cols[2:32]] + [season, split]
+                for j, col in enumerate(cols):
+                    if j >= len(page_headers):
+                        break
+                    page_header = page_headers[j]
+                    value = col.get_text(strip=True)
 
-                team_dict = dict(zip(headers_list, values))
-                all_teams.append(team_dict)
+                    if page_header in known_headers:
+                        team[known_headers[page_header]] = value
+                    else:
+                        extras[page_header] = value
 
-    # all_teams = json.dumps(all_teams, indent=4)
+                # season from table takes priority, fall back to loop variable
+                if "season" not in team:
+                    team["season"] = season
+
+                team["extras"] = json.dumps(extras) if extras else ""
+
+                if team.get("name", ""):
+                    all_teams.append(team)
 
     return all_teams
 
