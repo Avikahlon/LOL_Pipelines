@@ -13,7 +13,7 @@ schema_keys = ["name", "season", "region", "games", "winrate", "kd", "gpm", "gdm
                "dragsPerGame", "dragPercent", "vgPerGame", "heraldPercent",
                "avgDrags15", "TDat15", "GDat15", "platesPerGame",
                "baronPergame", "baronPercent", "cspm", "dpm",
-               "wpm", "visionWardsPM", "wardsClearedPM", "split", "extras"]
+               "wpm", "visionWardsPM", "wardsClearedPM", "split"]
 
 team_schema = StructType([StructField(k, StringType(), True) for k in schema_keys] +
                          [StructField("extras", StringType(), True)])
