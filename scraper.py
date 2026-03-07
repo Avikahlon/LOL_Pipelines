@@ -493,7 +493,7 @@ def extract_player_game_data(tree: HTMLParser, game_url: str):
             try:
                 game_number = int(text.replace("Game", "").strip())
             except ValueError:
-                game_number = None
+                game_number = 1
 
     tables = tree.css("table.playersInfosLine")
     if not tables or len(tables) < 2:
