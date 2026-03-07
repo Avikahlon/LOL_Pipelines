@@ -4,21 +4,22 @@ raw_df = spark.table("lol_raw.teams")
 
 def clean_float(col_name):
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~F.col(col_name).rlike("^-?[0-9]+\\.?[0-9]*$")),
         None
     ).otherwise(F.col(col_name).cast("float"))
 
 def clean_int(col_name):
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~F.col(col_name).rlike("^-?[0-9]+$")),
         None
     ).otherwise(F.col(col_name).cast("int"))
 
 def strip_pct(col_name):
+    cleaned = F.regexp_replace(F.col(col_name), "%", "")
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~cleaned.rlike("^-?[0-9]+\\.?[0-9]*$")),
         None
-    ).otherwise(F.regexp_replace(F.col(col_name), "%", "").cast("float"))
+    ).otherwise(cleaned.cast("float"))
 
 def parse_duration(col_name):
     return F.when(
