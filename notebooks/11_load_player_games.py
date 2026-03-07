@@ -10,7 +10,7 @@ def clean_int(col_name):
 
 staging_df = raw_df.select(
     F.col("game_url"),
-    clean_int("game_number"),
+    clean_int("game_number").alias("game_number"),
     F.col("player_name"),
     F.col("team_side"),
     F.col("champion"),
