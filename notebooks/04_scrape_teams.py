@@ -7,13 +7,13 @@ from utils.pipeline_monitor import log_pipeline_run
 from pyspark.sql.types import StructType, StructField, StringType
 import json
 
-schema_keys = ["name", "region", "games", "winrate", "k:d", "GPM", "GDM", "gameDuration",
-               "first_pick_pct", "blue_side_pct","killsPerGame", "deathsPerGame",
-               "towersKilled", "towersLost", "FBpercent",
-               "FTpercent", "FOSpercent", "dragsPerGame", "dragPercent", "vgPerGame",
-               "heraldPercent", "atakPercent", "avgDrags15", "TDat15", "GDat15",
-               "platesPerGame", "baronPergame", "baronPercent", "cspm", "dpm",
-               "wpm", "visionWardsPM", "wardsClearedPM", "season", "split"]
+schema_keys = ["name", "season", "region", "games", "winrate", "kd", "gpm", "gdm", "gameDuration",
+               "first_pick_pct", "blue_side_pct", "killsPerGame", "deathsPerGame",
+               "towersKilled", "towersLost", "FBpercent", "FTpercent",
+               "dragsPerGame", "dragPercent", "vgPerGame", "heraldPercent",
+               "avgDrags15", "TDat15", "GDat15", "platesPerGame",
+               "baronPergame", "baronPercent", "cspm", "dpm",
+               "wpm", "visionWardsPM", "wardsClearedPM", "split", "extras"]
 
 team_schema = StructType([StructField(k, StringType(), True) for k in schema_keys] +
                          [StructField("extras", StringType(), True)])
