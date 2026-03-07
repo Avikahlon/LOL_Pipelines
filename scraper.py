@@ -348,7 +348,7 @@ async def process_batch(session, batch, headers, semaphore):
         tree = HTMLParser(html)
 
         game_data = extract_team_game_data(tree, url)
-        player_data = extract_player_game_data(tree, url, index)
+        player_data = extract_player_game_data(tree, url)
 
         all_games_data.extend(game_data)
         all_players_data.extend(player_data)
@@ -482,8 +482,18 @@ def extract_team_game_data(tree: HTMLParser, game_url: str):
     return game_data
 
 
-def extract_player_game_data(tree: HTMLParser, game_url: str, game_number: int):
+def extract_player_game_data(tree: HTMLParser, game_url: str):
     players_data = []
+
+    active_button = tree.css_first("li.game-menu-button-active a")
+    game_number = None
+    if active_button:
+        text = active_button.text(strip=True)
+        if "Game" in text:
+            try:
+                game_number = int(text.replace("Game", "").strip())
+            except ValueError:
+                game_number = None
 
     tables = tree.css("table.playersInfosLine")
     if not tables or len(tables) < 2:

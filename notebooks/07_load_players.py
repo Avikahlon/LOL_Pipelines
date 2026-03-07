@@ -20,7 +20,7 @@ def strip_pct(col_name):
     return F.when(
         (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
         None
-    ).otherwise(F.regexp_replace(F.col(col_name), "%", ""))
+    ).otherwise(F.regexp_replace(F.col(col_name), "%", "").cast("float"))
 
 staging_df = raw_df.select(
     F.col("name").alias("player_name"),

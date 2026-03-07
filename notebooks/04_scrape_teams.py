@@ -8,7 +8,8 @@ from pyspark.sql.types import StructType, StructField, StringType
 import json
 
 schema_keys = ["name", "region", "games", "winrate", "k:d", "GPM", "GDM", "gameDuration",
-               "killsPerGame", "deathsPerGame", "towersKilled", "towersLost", "FBpercent",
+               "first_pick_pct", "blue_side_pct","killsPerGame", "deathsPerGame",
+               "towersKilled", "towersLost", "FBpercent",
                "FTpercent", "FOSpercent", "dragsPerGame", "dragPercent", "vgPerGame",
                "heraldPercent", "atakPercent", "avgDrags15", "TDat15", "GDat15",
                "platesPerGame", "baronPergame", "baronPercent", "cspm", "dpm",
