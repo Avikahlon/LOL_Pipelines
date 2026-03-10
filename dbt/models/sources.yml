@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: lol_staging
+    schema: lol_staging
+    tables:
+      - name: tournaments
+      - name: players
+      - name: teams
+      - name: matches
+      - name: games
+      - name: player_games

@@ -1,0 +1,20 @@
+name: lol_project
+version: '1.0.0'
+config-version: 2
+
+profile: lol_project
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+models:
+  lol_project:
+    staging:
+      +schema: lol_staging
+      +materialized: view
+    intermediate:
+      +schema: lol_intermediate
+      +materialized: view
+    marts:
+      +schema: lol_marts
+      +materialized: table
