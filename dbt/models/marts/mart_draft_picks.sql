@@ -3,7 +3,7 @@ with cleaned as (
         game_url,
         team,
         result,
-        regexp_replace(regexp_replace(picks, "\\[|\\]|'", ""), " ", "") as picks_clean
+        split(regexp_replace(regexp_replace(picks, "\\[|\\]|'", ""), "\\s", ""), ',') as picks_array
     from {{ ref('stg_games') }}
     where picks is not null and picks != ''
 ),
@@ -13,20 +13,19 @@ exploded as (
         game_url,
         team,
         result,
-        trim(champion) as champion,
-        row_number() over (partition by game_url, team order by monotonically_increasing_id()) as pick_order
+        posexplode(picks_array) as (pick_order, champion_raw)
     from cleaned
-    lateral view explode(split(picks_clean, ',')) as champion
 )
 
 select
     game_url,
     team,
     result,
-    champion,
-    pick_order,
+    trim(champion_raw) as champion,
+    pick_order + 1 as pick_order,
     case when result = 'Victory' then 1 else 0 end as win
 from exploded
-where champion is not null
-    and champion != ''
-    and champion != 'Noban'
+where trim(champion_raw) is not null
+    and trim(champion_raw) != ''
+    and trim(champion_raw) != 'Noban'
+    and trim(champion_raw) != 'No ban'
