@@ -13,7 +13,6 @@ exploded as (
         game_url,
         team,
         result,
-        trim(champion) as champion,
         posexplode(bans_array) as (ban_order, champion_raw)
     from cleaned
 )
