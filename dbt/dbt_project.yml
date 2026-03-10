@@ -9,6 +9,7 @@ test-paths: ["tests"]
 
 models:
   lol_project:
+    +catalog: workspace
     staging:
       +schema: lol_staging
       +materialized: view
