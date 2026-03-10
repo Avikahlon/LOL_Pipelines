@@ -23,7 +23,7 @@ select
     result,
     trim(champion_raw) as champion,
     pick_order + 1 as pick_order,
-    case when result = 'Victory' then 1 else 0 end as win
+    case when result = 'WIN' then 1 else 0 end as win
 from exploded
 where trim(champion_raw) is not null
     and trim(champion_raw) != ''
