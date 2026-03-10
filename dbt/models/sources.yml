@@ -2,6 +2,7 @@ version: 2
 
 sources:
   - name: lol_staging
+    catalog: workspace
     schema: lol_staging
     tables:
       - name: tournaments
