@@ -1,0 +1,25 @@
+select
+    player_name,
+    country,
+    season,
+    split,
+    games,
+    winrate,
+    kda,
+    avg_kills,
+    avg_deaths,
+    avg_assists,
+    csm,
+    gpm,
+    kp,
+    dmg_pct,
+    gold_pct,
+    dpm,
+    gd15,
+    csd15,
+    xpd15,
+    fb_pct,
+    penta_kills,
+    solo_kills
+from {{ ref('stg_players') }}
+where games >= 10
