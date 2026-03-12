@@ -12,7 +12,7 @@ import json
 game_schema_keys = ["team", "result", "kills", "towers", "dragons", "barons", "gold",
                     "first_blood", "first_tower", "dragon_types", "bans", "picks", "game_url"]
 
-player_schema_keys = ["game_url", "game_number", "player_name", "team_side", "champion",
+player_schema_keys = ["game_url", "game_number", "player_name", "team", "team_side", "champion",
                       "kills", "deaths", "assists", "cs"]
 
 game_schema = StructType([StructField(k, StringType(), True) for k in game_schema_keys] +

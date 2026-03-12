@@ -24,6 +24,7 @@ staging_df = raw_df.select(
     F.col("game_url"),
     clean_int("game_number").alias("game_number"),
     F.col("player_name"),
+    F.col("team"),
     F.col("team_side"),
     F.col("champion"),
     clean_int("kills").alias("kills"),
@@ -36,7 +37,10 @@ staging_df = raw_df.select(
 .filter(F.col("game_url") != "") \
 .filter(F.col("player_name").isNotNull()) \
 .filter(F.col("player_name") != "") \
-.dropDuplicates(["game_url", "game_number", "player_name"])
+.filter(F.col("team").isNotNull()) \
+.filter(F.col("team") != "")
+
+staging_df = staging_df.dropDuplicates(["game_url", "game_number", "player_name", "team"])
 
 staging_df.write \
     .format("delta") \

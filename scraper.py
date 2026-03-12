@@ -525,13 +525,19 @@ def extract_team_game_data(tree: HTMLParser, game_url: str):
 def extract_player_game_data(tree: HTMLParser, game_url: str):
     players_data = []
 
+    # get team names from blue/red headers
+    blue_header = tree.css_first("div.blue-line-header a")
+    red_header = tree.css_first("div.red-line-header a")
+    blue_team = blue_header.text(strip=True) if blue_header else ""
+    red_team = red_header.text(strip=True) if red_header else ""
+
     active_button = tree.css_first("li.game-menu-button-active a")
-    game_number = None
+    game_number = 1
     if active_button:
         text = active_button.text(strip=True)
         if "Game" in text:
             try:
-                game_number = int(text.replace("Game", "").strip()) or 1
+                game_number = int(text.replace("Game", "").strip())
             except ValueError:
                 game_number = 1
 
@@ -540,6 +546,7 @@ def extract_player_game_data(tree: HTMLParser, game_url: str):
         return players_data
 
     for side, table in zip(["blue", "red"], tables):
+        team_name = blue_team if side == "blue" else red_team
         rows = table.css("tr")
 
         for row in rows:
@@ -554,7 +561,6 @@ def extract_player_game_data(tree: HTMLParser, game_url: str):
             player_name = player_tag.text(strip=True) if player_tag else None
             player_url = player_tag.attrs.get("href", "") if player_tag else ""
             player_id = player_url.strip("/").split("/")[2] if player_url else None
-            # print(f"Processing player: {player_name} ({champion})")
 
             kda_text = cols[-2].text(strip=True)
             try:
@@ -572,6 +578,7 @@ def extract_player_game_data(tree: HTMLParser, game_url: str):
                 "game_url": game_url,
                 "game_number": game_number,
                 "player_name": player_name,
+                "team": team_name,
                 "team_side": side,
                 "champion": champion,
                 "kills": kills,
@@ -734,3 +741,4 @@ async def get_matches_async(tournaments, max_concurrent=5):
 
     print(f"Finished in {time.time() - start:.2f}s")
     return results
+
