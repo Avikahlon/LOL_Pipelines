@@ -4,21 +4,22 @@ raw_df = spark.table("lol_raw.player_games")
 
 def clean_float(col_name):
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~F.col(col_name).rlike("^-?[0-9]+\\.?[0-9]*$")),
         None
-    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.-]", ""), "float"))
+    ).otherwise(F.col(col_name).cast("float"))
 
 def clean_int(col_name):
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~F.col(col_name).rlike("^-?[0-9]+$")),
         None
-    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9]", ""), "int"))
+    ).otherwise(F.col(col_name).cast("int"))
 
 def strip_pct(col_name):
+    cleaned = F.regexp_replace(F.col(col_name), "%", "")
     return F.when(
-        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (F.col(col_name) == "-") | (F.col(col_name) == "None"),
+        (F.col(col_name).isNull()) | (F.col(col_name) == "") | (~cleaned.rlike("^-?[0-9]+\\.?[0-9]*$")),
         None
-    ).otherwise(F.try_cast(F.regexp_replace(F.col(col_name), "[^0-9.]", ""), "float"))
+    ).otherwise(cleaned.cast("float"))
 
 staging_df = raw_df.select(
     F.col("game_url"),
