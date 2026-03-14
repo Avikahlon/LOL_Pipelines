@@ -1,36 +1,41 @@
-with pick_stats as (
+with game_context as (
+    select distinct
+        game_url,
+        season,
+        region
+    from {{ ref('int_player_games_enriched') }}
+),
+
+pick_stats as (
     select
         p.champion,
-        t.season,
-        t.region,
+        gc.season,
+        gc.region,
         count(*) as games_picked,
         sum(p.win) as wins
     from {{ ref('mart_draft_picks') }} p
-    left join {{ ref('int_player_games_enriched') }} e on p.game_url = e.game_url
-    left join {{ source('lol_staging', 'tournaments') }} t on e.tournament = t.tournament_name
-    group by p.champion, t.season, t.region
+    left join game_context gc on p.game_url = gc.game_url
+    group by p.champion, gc.season, gc.region
 ),
 
 ban_stats as (
     select
         b.champion,
-        t.season,
-        t.region,
+        gc.season,
+        gc.region,
         count(*) as games_banned
     from {{ ref('mart_draft_bans') }} b
-    left join {{ ref('int_player_games_enriched') }} e on b.game_url = e.game_url
-    left join {{ source('lol_staging', 'tournaments') }} t on e.tournament = t.tournament_name
-    group by b.champion, t.season, t.region
+    left join game_context gc on b.game_url = gc.game_url
+    group by b.champion, gc.season, gc.region
 ),
 
 total_games as (
     select
-        t.season,
-        t.region,
-        count(distinct e.game_url) / 2 as total
-    from {{ ref('int_player_games_enriched') }} e
-    left join {{ source('lol_staging', 'tournaments') }} t on e.tournament = t.tournament_name
-    group by t.season, t.region
+        season,
+        region,
+        count(distinct game_url) / 2 as total
+    from game_context
+    group by season, region
 )
 
 select
