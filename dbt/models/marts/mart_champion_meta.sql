@@ -1,9 +1,11 @@
 with game_context as (
     select distinct
-        game_url,
-        season,
-        region
-    from {{ ref('int_player_games_enriched') }}
+        g.game_url,
+        e.season,
+        e.region
+    from {{ source('lol_staging', 'games') }} g
+    left join {{ ref('int_player_games_enriched') }} e
+        on g.game_url = e.game_url
 ),
 
 pick_stats as (
@@ -33,7 +35,7 @@ total_games as (
     select
         season,
         region,
-        count(distinct game_url) / 2 as total
+        count(distinct game_url) as total
     from game_context
     group by season, region
 )
