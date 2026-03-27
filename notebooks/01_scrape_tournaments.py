@@ -2,7 +2,7 @@ import sys
 
 sys.path.insert(0, "/Workspace/Users/abhijeetsk247@gmail.com/LOL_Pipelines")
 
-from scraper import get_tournaments
+from scraper import get_tournaments, scrape_champion_roles
 from utils.pipeline_monitor import log_pipeline_run
 import json
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType

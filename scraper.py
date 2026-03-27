@@ -742,3 +742,67 @@ async def get_matches_async(tournaments, max_concurrent=5):
     print(f"Finished in {time.time() - start:.2f}s")
     return results
 
+def scrape_champion_roles():
+    roles = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]
+    champion_role_picks = {}  # champion_name -> {role: picks}
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Referer": "https://gol.gg/champion/list/season-S16/split-Winter/tournament-ALL/",
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    for role in roles:
+        print(f"Scraping {role}...")
+
+        url = "https://gol.gg/champion/list/season-S16/split-Winter/tournament-ALL/"
+        data = {"role": role}
+
+        response = requests.post(url, headers=headers, data=data)
+
+        if response.status_code != 200:
+            print(f"Failed for {role}: {response.status_code}")
+            continue
+
+        soup = BeautifulSoup(response.text, "html.parser")
+        table = soup.find("table", class_="table_list")
+
+        if not table:
+            print(f"No table found for {role}")
+            continue
+
+        # get header positions
+        headers_row = table.find("tr")
+        header_cols = [th.get_text(strip=True) for th in headers_row.find_all("th")]
+
+        picks_idx = next((i for i, h in enumerate(header_cols) if "Pick" in h), None)
+
+        if picks_idx is None:
+            print(f"No Picks column found for {role}")
+            continue
+
+        rows = table.find_all("tr")[1:]
+        for row in rows:
+            cols = row.find_all("td")
+            if len(cols) <= picks_idx:
+                continue
+
+            name_tag = cols[0].find("a")
+            if not name_tag:
+                continue
+
+            champion_name = name_tag.text.strip()
+
+            try:
+                picks = int(cols[picks_idx].get_text(strip=True))
+            except ValueError:
+                picks = 0
+
+            if champion_name not in champion_role_picks:
+                champion_role_picks[champion_name] = {}
+
+            champion_role_picks[champion_name][role] = picks
+
+        time.sleep(1)
+
+    return champion_role_picks
