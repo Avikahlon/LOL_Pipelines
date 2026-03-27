@@ -12,7 +12,7 @@ try:
 
     rows = []
     for champion, role_picks in sorted(data.items()):
-        sorted_roles = sorted(role_picks, key=lambda x: x[1], reverse=True)[:2]
+        sorted_roles = sorted(role_picks.items(), key=lambda x: x[1], reverse=True)[:2]
 
         primary_role = sorted_roles[0][0] if len(sorted_roles) > 0 else ""
         secondary_role = sorted_roles[1][0] if len(sorted_roles) > 1 else ""
@@ -25,7 +25,7 @@ try:
         rows.append(row)
 
     print(f"Got length of {len(rows)} rows")
-    
+
     roles_schema = StructType([
         StructField("champion_name", StringType(), True),
         StructField("primary_role", StringType(), True),
