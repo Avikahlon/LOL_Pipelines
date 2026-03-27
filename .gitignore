@@ -8,3 +8,4 @@ data/
 *.log
 .idea/
 test.py
+/notebooks/champion_roles.csv

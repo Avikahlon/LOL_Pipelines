@@ -16,6 +16,12 @@ models:
     intermediate:
       +schema: lol_intermediate
       +materialized: view
+    dims:
+      +schema: lol_dims
+      +materialized: table
+    facts:
+      +schema: lol_facts
+      +materialized: table
     marts:
       +schema: lol_marts
       +materialized: table
