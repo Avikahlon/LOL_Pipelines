@@ -26,7 +26,7 @@ player_primary_role as (
         primary_role as position
     from player_role_totals
     qualify row_number() over (partition by player_name order by role_total_games desc) = 1
-)
+),
 
 player_info as (
     select
@@ -40,7 +40,7 @@ select
     {{ dbt_utils.generate_surrogate_key(['p.player_name']) }} as player_key,
     p.player_name,
     i.country,
-    r.position,
+    r.position
 from (select distinct player_name from player_champion_totals) p
 left join player_primary_role r on p.player_name = r.player_name
 left join player_info i on p.player_name = i.player_name
