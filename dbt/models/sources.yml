@@ -11,3 +11,4 @@ sources:
       - name: matches
       - name: games
       - name: player_games
+      - name: champ_roles
