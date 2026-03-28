@@ -5,7 +5,7 @@ with player_champion_totals as (
         cr.primary_role,
         sum(p.games_played) as total_games
     from {{ ref('int_player_champ_pools') }} p
-    left join {{ source('lol_staging', 'champ_roles') }} cr
+    left join {{ ref('stg_champ_roles') }} cr
         on p.champion = cr.champion_name
     where cr.primary_role is not null
     group by p.player_name, p.champion, cr.primary_role
