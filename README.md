@@ -2,7 +2,7 @@
 
 An end-to-end data engineering project that scrapes, transforms, and visualises professional League of Legends esports data across all regions and seasons.
 
-![Databricks Pipeline](images/databricks_pipeline.png)
+![Databricks Pipeline](images/databricks_pipeline)
 
 ## Overview
 
