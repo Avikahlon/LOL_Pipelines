@@ -112,6 +112,3 @@ Every pipeline run is logged to `lol_monitoring.pipeline_runs` with status, reco
 ## Data Source
 
 All data sourced from [Games of Legends](https://gol.gg) — the leading statistical database for professional LoL esports.
-
-Inline-style: 
-![alt text]("Logo Title Text 1")
