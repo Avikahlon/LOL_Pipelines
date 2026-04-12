@@ -79,8 +79,8 @@ lol_stats/
 
 ## dbt Models
 
-![dbt Lineage](images/dbt_lineage.png)
-![dbt_structure](images/dbt_files.png)
+![dbt Lineage](images/dbt_lineage)
+![dbt_structure](images/dbt_files)
 
 ### Staging
 Views sitting directly on top of cleaned Delta tables — no business logic, just typing and renaming.
