@@ -2,6 +2,8 @@
 
 An end-to-end data engineering project that scrapes, transforms, and visualises professional League of Legends esports data across all regions and seasons.
 
+![Databricks Pipeline](images/databricks_pipeline.png)
+
 ## Overview
 
 This project builds a production-grade analytics pipeline covering over 60,000 competitive games across all major LoL esports regions from Season 3 to present. It demonstrates the full analytics engineering stack from raw data ingestion through to business intelligence dashboards.
@@ -77,15 +79,30 @@ lol_stats/
 
 ## dbt Models
 
-**Staging** — views on top of cleaned Delta tables
+![dbt Lineage](images/dbt_lineage.png)
+![dbt_structure](images/dbt_files.png)
 
-**Intermediate**
-- `int_player_performances` — player game stats joined with match and tournament context
+### Staging
+Views sitting directly on top of cleaned Delta tables — no business logic, just typing and renaming.
 
-**Marts**
-- `player_season_stats` — aggregated player stats per season and split
-- `team_tournament_performance` — team win rates, objective control, and gold metrics per tournament
-- `champion_meta_by_patch` — pick/ban rates and win rates per champion per patch
+### Intermediate
+| Model | Description |
+|---|---|
+| `int_player_games_enriched` | Player game stats joined with match and tournament context |
+| `int_player_champion_pool` | Per player per champion stats with role mapping |
+| `int_team_draft_tendencies` | Per team pick/ban rates and win rates |
+| `int_current_rosters` | Derived current rosters from most recent S16 games |
+
+### Marts
+| Model | Description |
+|---|---|
+| `mart_player_season_stats` | Aggregated player stats per season and split |
+| `mart_team_season_stats` | Team win rates, objective control, gold metrics |
+| `mart_match_results` | One row per match with winner, score, patch |
+| `mart_game_stats` | Team-level game stats joined with tournament context |
+| `mart_champion_meta` | Pick/ban/win rates per champion per season and region |
+| `mart_draft_picks` | Exploded picks — one row per pick per game |
+| `mart_draft_bans` | Exploded bans — one row per ban per game |
 
 ## Pipeline Monitoring
 
