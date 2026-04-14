@@ -2,7 +2,7 @@
 
 An end-to-end data engineering project that scrapes, transforms, and visualises professional League of Legends esports data across all regions and seasons.
 
-![Databricks Pipeline](images/databricks_pipeline)
+![Diagram](images/diagram.png)
 
 ## Overview
 
@@ -47,6 +47,7 @@ dbt models (staging → intermediate → marts)
 | Teams | ~7,000 | Season/split aggregated team stats |
 
 ## Project Structure
+![Databricks Pipeline](images/databricks_pipeline)
 
 ```
 lol_stats/
