@@ -2,6 +2,8 @@
 
 An end-to-end data engineering project that scrapes, transforms, and visualises professional League of Legends esports data across all regions and seasons.
 
+![Diagram](images/diagram.png)
+
 ## Overview
 
 This project builds a production-grade analytics pipeline covering over 60,000 competitive games across all major LoL esports regions from Season 3 to present. It demonstrates the full analytics engineering stack from raw data ingestion through to business intelligence dashboards.
@@ -20,8 +22,6 @@ PySpark transformation notebooks
 Delta Tables - lol_staging (cleaned, typed)
     ↓
 dbt models (staging → intermediate → marts)
-    ↓
-Power BI Dashboard
 ```
 
 ## Stack
@@ -32,8 +32,7 @@ Power BI Dashboard
 | Orchestration | Databricks Workflows |
 | Storage | Delta Lake |
 | Transformation | PySpark, dbt-databricks |
-| Data Quality | Great Expectations, dbt tests |
-| Visualisation | Power BI |
+| Data Quality | dbt tests |
 | Version Control | GitHub |
 
 ## Data
@@ -48,6 +47,7 @@ Power BI Dashboard
 | Teams | ~7,000 | Season/split aggregated team stats |
 
 ## Project Structure
+![Databricks Pipeline](images/databricks_pipeline)
 
 ```
 lol_stats/
@@ -55,10 +55,18 @@ lol_stats/
 ├── notebooks/
 │   ├── 01_scrape_tournaments.py
 │   ├── 02_scrape_players.py
-│   ├── 03_scrape_teams.py
-│   ├── 04_scrape_matches.py
+│   ├── 03_scrape_matches.py
+│   ├── 04_scrape_teams.py
 │   ├── 05_scrape_games.py
-│   └── 06_load_to_staging.py
+│   ├── 06_load_tournaments.py
+│   ├── 07_load_players.py
+│   ├── 08_load_teams.py
+│   ├── 09_load_matches.py
+│   ├── 10_load_games.py
+│   ├── 11_load_player_games.py
+│   ├── 12_scrape_champ_roles.py
+│   └── 13_load_champ_roles.py
+
 ├── utils/
 │   └── pipeline_monitor.py
 ├── dbt/
@@ -72,36 +80,35 @@ lol_stats/
 
 ## dbt Models
 
-**Staging** — views on top of cleaned Delta tables
+![dbt Lineage](images/dbt_lineage)
+![dbt_structure](images/dbt_files)
 
-**Intermediate**
-- `int_player_performances` — player game stats joined with match and tournament context
+### Staging
+Views sitting directly on top of cleaned Delta tables — no business logic, just typing and renaming.
 
-**Marts**
-- `player_season_stats` — aggregated player stats per season and split
-- `team_tournament_performance` — team win rates, objective control, and gold metrics per tournament
-- `champion_meta_by_patch` — pick/ban rates and win rates per champion per patch
+### Intermediate
+| Model | Description |
+|---|---|
+| `int_player_games_enriched` | Player game stats joined with match and tournament context |
+| `int_player_champion_pool` | Per player per champion stats with role mapping |
+| `int_team_draft_tendencies` | Per team pick/ban rates and win rates |
+| `int_current_rosters` | Derived current rosters from most recent S16 games |
+
+### Marts
+| Model | Description |
+|---|---|
+| `mart_player_season_stats` | Aggregated player stats per season and split |
+| `mart_team_season_stats` | Team win rates, objective control, gold metrics |
+| `mart_match_results` | One row per match with winner, score, patch |
+| `mart_game_stats` | Team-level game stats joined with tournament context |
+| `mart_champion_meta` | Pick/ban/win rates per champion per season and region |
+| `mart_draft_picks` | Exploded picks — one row per pick per game |
+| `mart_draft_bans` | Exploded bans — one row per ban per game |
 
 ## Pipeline Monitoring
 
 Every pipeline run is logged to `lol_monitoring.pipeline_runs` with status, record counts, and error details. Databricks Workflows sends email alerts on failure.
 
-## Dashboard
-
-The Power BI dashboard covers:
-- Player performance rankings by season and region
-- Team win rates and objective control trends
-- Champion meta shifts by patch
-- Head to head team comparisons
-
-## Setup
-
-1. Clone the repo
-2. Install dependencies: `pip install -r requirements.txt`
-3. Copy `.env.example` to `.env` and fill in credentials
-4. Connect repo to Databricks via Repos
-5. Run notebooks in order via Databricks Workflows
-6. Run `dbt run` and `dbt test`
 
 ## Data Source
 
