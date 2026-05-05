@@ -2,7 +2,8 @@ with game_context as (
     select distinct
         g.game_url,
         e.season,
-        e.region
+        e.region,
+        e.patch
     from {{ source('lol_staging', 'games') }} g
     left join {{ ref('int_player_games_enriched') }} e
         on g.game_url = e.game_url
@@ -13,11 +14,12 @@ pick_stats as (
         p.champion,
         gc.season,
         gc.region,
+        gc.patch,
         count(*) as games_picked,
         sum(p.win) as wins
     from {{ ref('mart_draft_picks') }} p
     left join game_context gc on p.game_url = gc.game_url
-    group by p.champion, gc.season, gc.region
+    group by p.champion, gc.season, gc.region, gc.patch
 ),
 
 ban_stats as (
@@ -25,25 +27,28 @@ ban_stats as (
         b.champion,
         gc.season,
         gc.region,
+        gc.patch,
         count(*) as games_banned
     from {{ ref('mart_draft_bans') }} b
     left join game_context gc on b.game_url = gc.game_url
-    group by b.champion, gc.season, gc.region
+    group by b.champion, gc.season, gc.region, gc.patch
 ),
 
 total_games as (
     select
         season,
         region,
+        patch,
         count(distinct game_url) as total
     from game_context
-    group by season, region
+    group by season, region, patch
 )
 
 select
     coalesce(p.champion, b.champion) as champion,
     coalesce(p.season, b.season) as season,
     coalesce(p.region, b.region) as region,
+    coalesce(p.patch, b.patch) as patch,
     coalesce(p.games_picked, 0) as games_picked,
     coalesce(b.games_banned, 0) as games_banned,
     round(coalesce(p.games_picked, 0) / nullif(tg.total, 0), 3) as pick_rate,
@@ -58,6 +63,8 @@ full outer join ban_stats b
     on p.champion = b.champion
     and p.season = b.season
     and p.region = b.region
+    and p.patch = b.patch
 left join total_games tg
     on coalesce(p.season, b.season) = tg.season
     and coalesce(p.region, b.region) = tg.region
+    and coalesce(p.patch, b.patch) = tg.patch
