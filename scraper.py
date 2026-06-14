@@ -659,7 +659,7 @@ async def fetch_tournament_matches(session, tournament, semaphore):
 
     html = await fetch(session, url, semaphore, headers)
     if not html:
-        return []
+        return None
 
     tree = LexborHTMLParser(html)
     table = tree.css_first("table.table_list")
@@ -729,6 +729,7 @@ async def fetch_tournament_matches(session, tournament, semaphore):
 async def get_matches_async(tournaments, max_concurrent=5):
     semaphore = asyncio.Semaphore(max_concurrent)
     results = []
+    failed_tournaments = []
     start = time.time()
 
     async with aiohttp.ClientSession() as session:
@@ -736,11 +737,15 @@ async def get_matches_async(tournaments, max_concurrent=5):
         tournaments_results = await asyncio.gather(*tasks)
 
         for tournament, matches in zip(tournaments, tournaments_results):
-            print(f"{tournament}: {len(matches)} matches")
-            results.extend(matches)
+            if matches is None:
+                print(f"{tournament}: FAILED (fetch timeout/error)")
+                failed_tournaments.append(tournament)
+            else:
+                print(f"{tournament}: {len(matches)} matches")
+                results.extend(matches)
 
     print(f"Finished in {time.time() - start:.2f}s")
-    return results
+    return results, failed_tournaments
 
 def scrape_champion_roles():
     roles = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]
