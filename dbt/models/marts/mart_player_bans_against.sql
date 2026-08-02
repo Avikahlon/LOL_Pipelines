@@ -7,7 +7,7 @@ with player_teams as (
         e.region,
         dp.position
     from {{ ref('int_player_games_enriched') }} e
-    join {{ ref('dim_players') }} dp
+    join {{ ref('dim_player') }} dp
         on e.player_name = dp.player_name
 ),
 
