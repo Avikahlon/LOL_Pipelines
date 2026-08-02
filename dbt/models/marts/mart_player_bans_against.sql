@@ -1,12 +1,14 @@
-with player_games as (
-    select
-        player_name,
-        team,
-        game_url,
-        season,
-        region
-    from {{ ref('int_player_games_enriched') }}
-    where player_name is not null
+with player_teams as (
+    select distinct
+        e.player_name,
+        e.team,
+        e.game_url,
+        e.season,
+        e.region,
+        dp.position
+    from {{ ref('int_player_games_enriched') }} e
+    join {{ ref('dim_players') }} dp
+        on e.player_name = dp.player_name
 ),
 
 opponent_bans as (
@@ -17,10 +19,13 @@ opponent_bans as (
         pg.region,
         b.champion as banned_champion,
         b.ban_order
-    from player_games pg
+    from player_teams pt
     join {{ ref('mart_draft_bans') }} b
-        on pg.game_url = b.game_url
-        and b.team != pg.team
+        on pt.game_url = b.game_url
+        and b.team != pt.team
+    join {{ source('lol_staging', 'champ_roles') }} cr
+        on b.champion = cr.champion_name
+        and (cr.primary_role = pt.position or cr.secondary_role = pt.position)
 )
 
 select
