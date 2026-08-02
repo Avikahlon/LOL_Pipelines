@@ -13,10 +13,10 @@ with player_teams as (
 
 opponent_bans as (
     select
-        pg.player_name,
-        pg.game_url,
-        pg.season,
-        pg.region,
+        pt.player_name,
+        pt.game_url,
+        pt.season,
+        pt.region,
         b.champion as banned_champion,
         b.ban_order
     from player_teams pt
