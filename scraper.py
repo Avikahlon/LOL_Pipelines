@@ -747,67 +747,83 @@ async def get_matches_async(tournaments, max_concurrent=5):
     print(f"Finished in {time.time() - start:.2f}s")
     return results, failed_tournaments
 
+
 def scrape_champion_roles():
     roles = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"]
     champion_role_picks = {}  # champion_name -> {role: picks}
 
+    data = get_season_split_role_data()
+    seasons = data["seasons"]
+    splits = data["splits"]
+    split_order = [s for s in splits if s != "ALL"]
+
+    season_splits = []
+    for season in seasons:
+        for split in split_order:
+            season_splits.append((season, split))
+
+    season_splits = season_splits[::-1]
+    season_splits = season_splits[:3]
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "Referer": "https://gol.gg/champion/list/season-S16/split-Winter/tournament-ALL/",
+        "Referer": "https://gol.gg/champion/list/",
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
-    for role in roles:
-        print(f"Scraping {role}...")
+    for season, split in season_splits:
+        url = f"https://gol.gg/champion/list/season-{season}/split-{split}/tournament-ALL/"
+        print(f"\n=== Scraping {season} {split} ===")
 
-        url = "https://gol.gg/champion/list/season-S16/split-Winter/tournament-ALL/"
-        data = {"role": role}
+        for role in roles:
+            data = {"role": role}
+            response = requests.post(url, headers=headers, data=data)
 
-        response = requests.post(url, headers=headers, data=data)
-
-        if response.status_code != 200:
-            print(f"Failed for {role}: {response.status_code}")
-            continue
-
-        soup = BeautifulSoup(response.text, "html.parser")
-        table = soup.find("table", class_="table_list")
-
-        if not table:
-            print(f"No table found for {role}")
-            continue
-
-        # get header positions
-        headers_row = table.find("tr")
-        header_cols = [th.get_text(strip=True) for th in headers_row.find_all("th")]
-
-        picks_idx = next((i for i, h in enumerate(header_cols) if "Pick" in h), None)
-
-        if picks_idx is None:
-            print(f"No Picks column found for {role}")
-            continue
-
-        rows = table.find_all("tr")[1:]
-        for row in rows:
-            cols = row.find_all("td")
-            if len(cols) <= picks_idx:
+            if response.status_code != 200:
+                print(f"Failed for {season} {split} {role}: {response.status_code}")
                 continue
 
-            name_tag = cols[0].find("a")
-            if not name_tag:
+            soup = BeautifulSoup(response.text, "html.parser")
+            table = soup.find("table", class_="table_list")
+
+            if not table:
+                print(f"No table found for {season} {split} {role}")
                 continue
 
-            champion_name = name_tag.text.strip()
+            headers_row = table.find("tr")
+            header_cols = [th.get_text(strip=True) for th in headers_row.find_all("th")]
+            picks_idx = next((i for i, h in enumerate(header_cols) if "Pick" in h), None)
 
-            try:
-                picks = int(cols[picks_idx].get_text(strip=True))
-            except ValueError:
-                picks = 0
+            if picks_idx is None:
+                print(f"No Picks column found for {season} {split} {role}")
+                continue
 
-            if champion_name not in champion_role_picks:
-                champion_role_picks[champion_name] = {}
+            rows = table.find_all("tr")[1:]
+            for row in rows:
+                cols = row.find_all("td")
+                if len(cols) <= picks_idx:
+                    continue
 
-            champion_role_picks[champion_name][role] = picks
+                name_tag = cols[0].find("a")
+                if not name_tag:
+                    continue
 
-        time.sleep(1)
+                champion_name = name_tag.text.strip()
+
+                try:
+                    picks = int(cols[picks_idx].get_text(strip=True))
+                except ValueError:
+                    picks = 0
+
+                if champion_name not in champion_role_picks:
+                    champion_role_picks[champion_name] = {}
+
+                champion_role_picks[champion_name][role] = (
+                        champion_role_picks[champion_name].get(role, 0) + picks
+                )
+
+            time.sleep(1)
 
     return champion_role_picks
+
+
