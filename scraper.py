@@ -825,5 +825,3 @@ def scrape_champion_roles():
             time.sleep(1)
 
     return champion_role_picks
-
-

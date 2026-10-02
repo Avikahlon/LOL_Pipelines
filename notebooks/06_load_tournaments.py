@@ -16,7 +16,7 @@ staging_df = raw_df.select(
 ) \
 .filter(F.col("trname").isNotNull()) \
 .filter(F.col("trname") != "") \
-.dropDuplicates(["tournament_name", "season"])
+.dropDuplicates(["tournament_name", "season", "region"])
 
 staging_df.write \
     .format("delta") \
