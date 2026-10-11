@@ -9,7 +9,6 @@ import aiohttp
 import asyncio
 import logging
 from selectolax.lexbor import LexborHTMLParser
-from selectolax.parser import HTMLParser
 import nest_asyncio
 nest_asyncio.apply()
 
@@ -385,7 +384,7 @@ async def process_batch(session, batch, headers, semaphore):
         if not html:
             continue
 
-        tree = HTMLParser(html)
+        tree = LexborHTMLParser(html)
 
         game_data = extract_team_game_data(tree, url)
         player_data = extract_player_game_data(tree, url)
@@ -426,7 +425,7 @@ async def get_game(game_urls, BATCH_SIZE=500, MAX_CONCURRENT=10):
     return all_games_data, all_players_data
 
 
-def extract_team_game_data(tree: HTMLParser, game_url: str):
+def extract_team_game_data(tree: LexborHTMLParser, game_url: str):
     game_data = []
 
     teams = tree.css("div.row.rowbreak > div.col-12.col-sm-6")
@@ -522,7 +521,7 @@ def extract_team_game_data(tree: HTMLParser, game_url: str):
     return game_data
 
 
-def extract_player_game_data(tree: HTMLParser, game_url: str):
+def extract_player_game_data(tree: LexborHTMLParser, game_url: str):
     players_data = []
 
     # get team names from blue/red headers
