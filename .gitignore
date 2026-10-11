@@ -9,3 +9,6 @@ data/
 .idea/
 test.py
 /notebooks/champion_roles.csv
+dbt/dbt_packages/
+dbt/target/
+dbt/logs/

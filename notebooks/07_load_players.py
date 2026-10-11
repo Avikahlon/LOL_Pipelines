@@ -25,6 +25,7 @@ def strip_pct(col_name):
 
 staging_df = raw_df.select(
     F.col("name").alias("player_name"),
+    F.regexp_extract(F.col("link"), r"player-stats/(\d+)/", 1).cast("int").alias("player_id"),
     F.col("link"),
     F.col("country"),
     F.col("season"),
@@ -57,7 +58,7 @@ staging_df = raw_df.select(
 ) \
 .filter(F.col("name").isNotNull()) \
 .filter(F.col("name") != "") \
-.dropDuplicates(["player_name", "season", "split"])
+.dropDuplicates(["player_name","player_id", "season", "split"])
 
 staging_df.write \
     .format("delta") \
